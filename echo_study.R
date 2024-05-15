@@ -103,9 +103,14 @@ system.time(
                ys <- ys[sub_idx]
                
                # compute the "true" ATET with treatment/outcome information on the target sample
-               prob_trt_test <- get_prop_score(x_test, trt_test)$s
-               ATET <- weighted.mean(y_test[trt_test == 1], 1 / prob_trt_test[trt_test == 1]) - 
-                  weighted.mean(y_test[trt_test != 1], 1 / (1 - prob_trt_test[trt_test != 1]))
+               
+              # prob_trt_test <- get_prop_score(x_test, trt_test)$s
+              # ATET <- weighted.mean(y_test[trt_test == 1], 1 / prob_trt_test[trt_test == 1]) - 
+              #    weighted.mean(y_test[trt_test != 1], 1 / (1 - prob_trt_test[trt_test != 1]))
+               
+               prob_trt_test <- weightit(trt_test ~ x_test, method = "ebal", estimand = "ATE")$weights
+               ATET <- weighted.mean(y_test[trt_test == 1], prob_trt_test[trt_test == 1]) - 
+                  weighted.mean(y_test[trt_test != 1], prob_trt_test[trt_test != 1])
                
                # construct weights
                xs_sub <- xs[, vars_H]
